@@ -405,21 +405,24 @@ async function send(text) {
   showTyping();
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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'
+      },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        system: SYSTEM,
-        messages: history.filter(m => m.role !== 'assistant' || history.indexOf(m) > history.length - 12)
-          .slice(-10)
-          .filter(m => m.content !== msg || m.role !== 'user' || history.filter(x => x.content === msg && x.role === 'user').indexOf(m) === 0)
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 500,
+        messages: [
+          { role: 'system', content: SYSTEM },
+          ...history.slice(-10)
+        ]
       })
     });
     const data = await res.json();
     removeTyping();
-    const reply = data.content && data.content[0] ? data.content[0].text : "Asante! Please contact us directly: +254 799 278 741 😊";
+    const reply = data.choices && data.choices[0] ? data.choices[0].message.content : "Asante! Please contact us directly: +254 799 278 741 😊";
     addMsg('bot', reply);
   } catch {
     removeTyping();
